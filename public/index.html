@@ -3,42 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PacketPulse-Sniffer | Operational Studio</title>
+  <title>PacketPulse-Sniffer | Network Flow & Protocol Dissection Console</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="header">
-    <div class="brand">
-      <span class="logo">⚡</span>
-      <div>
-        <h1>PacketPulse-Sniffer</h1>
-        <span class="sub">Real-Time Network Flow Analyzer & Protocol Dissector</span>
+  <div class="layout">
+    <header class="header">
+      <div class="brand">
+        <span class="logo">📡</span>
+        <div>
+          <h1>PacketPulse-Sniffer <span class="version-tag">v2.0.0</span></h1>
+          <span class="sub">Autonomous Deep Packet Inspection, Flow Tracking & Anomaly Detector</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div id="captureStatus" class="badge badge-live">CAPTURE: ACTIVE</div>
+        <button id="btnResetAll" class="btn btn-secondary">Reset Flows</button>
+      </div>
+    </header>
+
+    <!-- METRICS RIBBON -->
+    <section class="grid-metrics">
+      <div class="metric-card">
+        <span class="m-label">TOTAL PACKETS</span>
+        <span class="m-val" id="valTotalPackets">0</span>
+        <span class="m-sub">Inspected wire frames</span>
+      </div>
+      <div class="metric-card">
+        <span class="m-label">TOTAL VOLUME</span>
+        <span class="m-val highlight" id="valTotalBytes">0 B</span>
+        <span class="m-sub">Payload throughput</span>
+      </div>
+      <div class="metric-card">
+        <span class="m-label">ACTIVE FLOWS</span>
+        <span class="m-val" id="valActiveFlows">0</span>
+        <span class="m-sub">Bidirectional conversations</span>
+      </div>
+      <div class="metric-card">
+        <span class="m-label">PROTOCOL RATIO</span>
+        <span class="m-val small" id="valProtoDist">TCP: 0 | UDP: 0 | DNS: 0</span>
+        <span class="m-sub">Layer 4 / 7 distribution</span>
+      </div>
+      <div class="metric-card">
+        <span class="m-label">SECURITY ALERTS</span>
+        <span class="m-val danger" id="valAlertsCount">0</span>
+        <span class="m-sub">Anomalies detected</span>
+      </div>
+    </section>
+
+    <!-- ANOMALY ALERTS CONTAINER -->
+    <div id="anomalyBanner" class="alert-banner" style="display: none;">
+      <h3>⚠️ Security Anomalies Detected</h3>
+      <div id="anomalyList"></div>
+    </div>
+
+    <!-- MAIN TWO COLUMN SECTION -->
+    <div class="grid-two">
+      <!-- TRAFFIC SIMULATOR & CONTROL -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🚀 Live Traffic Generator & Ingestion</h2>
+          <span class="card-sub">Inject realistic protocols or synthetic attacks</span>
+        </div>
+        <div class="sim-actions">
+          <button id="btnSimTcp" class="btn btn-action">🤝 TCP 3-Way Handshake</button>
+          <button id="btnSimDns" class="btn btn-action">🌐 DNS Query</button>
+          <button id="btnSimScan" class="btn btn-action-danger">🚨 Port Scan Attack</button>
+        </div>
+        <div class="auto-stream-box">
+          <span>Continuous Traffic Stream:</span>
+          <button id="btnToggleStream" class="btn btn-toggle">▶ Start Stream</button>
+        </div>
+      </div>
+
+      <!-- PACKET DISSECTOR STUDIO -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🔬 Raw Packet Dissector Studio</h2>
+          <span class="card-sub">Decode raw hexadecimal Ethernet frames</span>
+        </div>
+        <form id="dissectForm" class="dissect-form">
+          <textarea id="hexInput" rows="3" placeholder="Paste raw packet hex (e.g. 001122334455aabbccddeeff08004500003c...)" required></textarea>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Dissect Frame</button>
+            <button type="button" id="btnLoadSample" class="btn btn-sm">Load Sample TCP SYN</button>
+          </div>
+        </form>
+        <pre id="dissectOutput" class="console-box">Paste frame hex or click "Load Sample TCP SYN" above.</pre>
       </div>
     </div>
-    <div class="status-badge">🟢 Operational Active</div>
-  </header>
-  <main class="main">
+
+    <!-- CONVERSATION FLOW TABLE -->
     <div class="card">
-      <h2>Engine Overview</h2>
-      <p>Deep packet inspection and protocol metric aggregator extracting DNS query latency, TCP handshake delays, and HTTP header anomalies with live streaming.</p>
-      <div class="metrics-row" id="metricsRow">
-        <div class="metric"><span class="lbl">STATUS</span><span class="val">HEALTHY</span></div>
-        <div class="metric"><span class="lbl">LATENCY</span><span class="val">&lt; 1 ms</span></div>
-        <div class="metric"><span class="lbl">THROUGHPUT</span><span class="val">2,400 req/s</span></div>
+      <div class="card-header flex-between">
+        <div>
+          <h2>📊 Bidirectional Flow Table</h2>
+          <span class="card-sub">Real-time socket pairings, packet volume, and TCP state transitions</span>
+        </div>
+        <button id="btnRefreshFlows" class="btn btn-sm">Refresh Table</button>
+      </div>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Protocol</th>
+              <th>Endpoint A</th>
+              <th>Endpoint B</th>
+              <th>Packets</th>
+              <th>Bytes</th>
+              <th>TCP State</th>
+              <th>Last Seen</th>
+            </tr>
+          </thead>
+          <tbody id="flowsBody">
+            <tr><td colspan="7" class="text-center text-muted">Awaiting network traffic. Click simulator buttons above.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="card">
-      <h2>Interactive Engine Execution</h2>
-      <form id="execForm">
-        <input type="text" id="payloadInput" placeholder='{"id":"test-1", "action":"evaluate"}' required>
-        <button type="submit">Execute Logic</button>
-      </form>
-      <pre id="outputConsole">Awaiting request...</pre>
-    </div>
-  </main>
-  <footer class="footer">
-    <p>PacketPulse-Sniffer &bull; Autonomously engineered by 7-Agent SDLC Factory for <a href="https://github.com/alinurettin/PacketPulse-Sniffer" target="_blank">Ali Nurettin Demir</a></p>
-  </footer>
+
+    <footer class="footer">
+      <p>PacketPulse-Sniffer v2.0.0 &bull; Network Protocol Flow Dissector &bull; Autonomously engineered by 7-Agent SDLC Factory for <a href="https://github.com/alinurettin/PacketPulse-Sniffer" target="_blank">Ali Nurettin Demir</a></p>
+    </footer>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
