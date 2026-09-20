@@ -1,0 +1,12 @@
+{
+  "name": "packetpulse-sniffer",
+  "version": "1.0.0",
+  "description": "Deep packet inspection and protocol metric aggregator extracting DNS query latency, TCP handshake delays, and HTTP header anomalies with live streaming.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node tests/run_tests.js"
+  },
+  "author": "Ali Nurettin Demir (alinurettin)",
+  "license": "MIT"
+}
